@@ -8,7 +8,7 @@ services:
   # 联网模型
   # ollama pull nomic-embed-text
   ollama:
-    image: ollama/ollama:0.5.10
+    image: ollama/ollama:latest
     container_name: ollama
     restart: unless-stopped
     ports:
