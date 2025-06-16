@@ -22,8 +22,8 @@
   - 上线部署监控
 
 **价值体现：**
-- 提升开发效率 50%+
-- 降低代码缺陷率 30%+
+- 提升开发效率
+- 降低代码缺陷率
 - 加速项目交付周期
 
 ### 🎯 MCP（模型控制协议）
@@ -72,57 +72,8 @@
 
 ## 📊 系统架构图
 
-![系统架构图](docs/images/img.png)
+![系统架构图](docs/images/系统架构.png)
 
-## 🚀 快速开始
+## 📊 RAG流程图
+![img.png](docs/images/RAG流程.png)
 
-### 环境要求
-- Java 17+
-- Maven 3.8+
-- Docker 20.10+
-- 8GB+ 内存
-
-### 安装部署
-
-```bash
-# 克隆项目
-git clone [repository-url]
-
-# 构建项目
-mvn clean package
-
-# 启动服务
-docker-compose up -d
-```
-
-## 📝 使用示例
-
-### RAG知识检索
-```bash
-# 上传文档
-curl -X POST /api/documents/upload -F "file=@document.pdf"
-
-# 智能问答
-curl -X POST /api/chat -d '{"question": "如何优化数据库性能？"}'
-```
-
-### MCP系统控制
-```bash
-# 系统健康检查
-curl -X GET /api/system/health
-
-# 执行运维任务
-curl -X POST /api/ops/execute -d '{"task": "log_analysis"}'
-```
-
-## 🤝 贡献指南
-
-欢迎提交Issue和Pull Request来帮助改进项目！
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
-
----
-
-**让AI成为您最得力的工作伙伴！** 🎉
