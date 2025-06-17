@@ -21,6 +21,34 @@ redis:
       ping-interval: 60000
       keep-alive: true
 
+# SpringDoc OpenAPI 配置
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  api-docs:
+    path: /v3/api-docs
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.lizhe.trigger.http
+
+# Knife4j 增强配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+    enable-version: true
+    enable-reload-cache-parameter: true
+    enable-after-script: true
+    enable-filter-multipart-api-method-type: POST
+    enable-filter-multipart-apis: false
+    enable-request-cache: true
+    enable-host: false
+    enable-home-custom: true
+    home-custom-path: classpath:markdown/home.md
+
 logging:
   level:
     root: info

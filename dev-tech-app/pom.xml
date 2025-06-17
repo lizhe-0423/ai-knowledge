@@ -48,6 +48,12 @@
             <artifactId>spring-boot-configuration-processor</artifactId>
         </dependency>
 
+        <!-- Knife4j API文档管理 -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
@@ -121,7 +127,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>cn.bugstack.xfg.dev.tech.Application</mainClass>
+                    <mainClass>com.lizhe.dev.tech.Application</mainClass>
                     <layout>JAR</layout>
                 </configuration>
             </plugin>
