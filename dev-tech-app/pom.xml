@@ -23,26 +23,31 @@
             <scope>test</scope>
         </dependency>
 
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.ai</groupId>-->
-<!--            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>-->
-<!--        </dependency>-->
+        <!-- Spring AI OpenAI集成启动器，支持OpenAI API调用 -->
+        <dependency>
+            <groupId>org.springframework.ai</groupId>
+            <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
+        </dependency>
 
+        <!-- Spring AI Tika文档读取器，用于解析各种文档格式 -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-tika-document-reader</artifactId>
         </dependency>
 
+        <!-- Spring AI PGVector向量数据库集成，用于向量存储和检索 -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-pgvector-store-spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- Spring AI Ollama集成，支持本地大语言模型 -->
         <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-ollama</artifactId>
         </dependency>
 
+        <!-- Spring Boot配置处理器，生成配置元数据用于IDE提示 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
@@ -67,12 +72,14 @@
             <artifactId>lombok</artifactId>
         </dependency>
 
+        <!-- Redisson Redis客户端，提供分布式锁、缓存等功能 -->
         <dependency>
             <groupId>org.redisson</groupId>
             <artifactId>redisson-spring-boot-starter</artifactId>
             <version>3.44.0</version>
         </dependency>
 
+        <!-- Eclipse JGit，Java实现的Git客户端库 -->
         <dependency>
             <groupId>org.eclipse.jgit</groupId>
             <artifactId>org.eclipse.jgit</artifactId>
@@ -111,6 +118,7 @@
             </testResource>
         </testResources>
         <plugins>
+            <!-- Maven单元测试插件，配置为跳过测试执行 -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
