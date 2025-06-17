@@ -70,4 +70,9 @@ public class OllamaController implements IAiService {
             @RequestParam(name = "message") String message) {
         return chatClient.stream(new Prompt(message, OllamaOptions.create().withModel(model)));
     }
+
+    @Override
+    public Flux<ChatResponse> generateStreamRag(String model, String ragTag, String message) {
+        return null;
+    }
 }

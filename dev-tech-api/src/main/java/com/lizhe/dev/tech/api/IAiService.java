@@ -35,4 +35,15 @@ public interface IAiService {
      * @throws IllegalArgumentException 当model或message为空时抛出
      */
     Flux<ChatResponse> generateStream(String model, String message);
+
+    /**
+     * 生成AI基于Rag问答(流式异步方式)
+     *
+     * @param model   使用的AI模型
+     * @param ragTag  选择知识库
+     * @param message 用户输入的消息内容
+     * @return Flux<ChatResponse> 响应流，可以逐步接收AI生成的内容
+     * @throws IllegalArgumentException 当model或message为空时抛出
+     */
+    Flux<ChatResponse> generateStreamRag(String model, String ragTag, String message);
 }
