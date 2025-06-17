@@ -84,13 +84,22 @@ public class RAGController implements IRAGService {
             @RequestParam("file") List<MultipartFile> files) {
         log.info("上传知识库开始 {}", ragTag);
         for (MultipartFile file : files) {
+            // 使用Tika文档读取器解析上传的文件
             TikaDocumentReader documentReader = new TikaDocumentReader(file.getResource());
+
+            // 读取文档内容，将文件转换为Document对象列表
             List<Document> documents = documentReader.get();
+
+            // 使用Token文本分割器将长文档切分成较小的文档片段，便于向量化和检索
             List<Document> documentSplitterList = tokenTextSplitter.apply(documents);
 
+            // 为原始文档添加知识库标签元数据，用于后续的文档分类和检索
             documents.forEach(doc -> doc.getMetadata().put("knowledge", ragTag));
+
+            // 为分割后的文档片段也添加相同的知识库标签元数据
             documentSplitterList.forEach(doc -> doc.getMetadata().put("knowledge", ragTag));
 
+            // 将分割后的文档片段存储到PostgreSQL向量数据库中，生成向量嵌入用于相似性搜索
             pgVectorStore.accept(documentSplitterList);
 
             RList<String> elements = redissonClient.getList("ragTag");
