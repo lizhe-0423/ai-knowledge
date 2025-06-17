@@ -16,11 +16,12 @@
     <!-- 输入区域 -->
     <div class="p-4 bg-white rounded-lg shadow-lg mt-4">
         <div class="flex space-x-2">
-            <label for="messageInput"></label><input
+            <input
                     type="text"
                     id="messageInput"
                     placeholder="输入消息..."
                     class="flex-1 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onkeypress="handleKeyPress(event)"
             >
             <button
                     onclick="sendMessage()"
@@ -115,12 +116,6 @@
                 sendMessage();
             }
         }
-
-        // 页面加载完成后添加事件监听器
-        document.addEventListener('DOMContentLoaded', function() {
-            const messageInput = document.getElementById('messageInput');
-            messageInput.addEventListener('keypress', handleKeyPress);
-        });
     </script>
 </body>
 </html>
