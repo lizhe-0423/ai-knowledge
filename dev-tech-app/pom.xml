@@ -98,7 +98,7 @@
     </dependencies>
 
     <build>
-        <finalName>xfg-dev-tech-app</finalName>
+        <finalName>ai-knowledge-app</finalName>
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
