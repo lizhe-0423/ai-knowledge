@@ -31,12 +31,10 @@ import java.util.stream.Collectors;
 @SpringBootTest
 public class RAGTest {
 
-    @Resource
+    @Resource(name = "customOllamaChatClient")
     private OllamaChatClient ollamaChatClient;
     @Resource
     private TokenTextSplitter tokenTextSplitter;
-    @Resource
-    private SimpleVectorStore simpleVectorStore;
     @Resource
     private PgVectorStore pgVectorStore;
 

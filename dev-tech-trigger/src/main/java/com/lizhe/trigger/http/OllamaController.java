@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/v1/ollama/")
 public class OllamaController implements IAiService {
 
-    @Resource
+    @Resource(name = "customOllamaChatClient")
     private OllamaChatClient chatClient;
 
     @Resource

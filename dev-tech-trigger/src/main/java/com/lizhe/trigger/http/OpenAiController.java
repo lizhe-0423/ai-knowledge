@@ -51,9 +51,9 @@ public class OpenAiController implements IAiService {
      * 该接口为同步调用，会等待完整响应后返回结果。
      * </p>
      * 
-     * <a href="http://localhost:8090/api/v1/openai/generate?model=gpt-3.5-turbo&message=你好">测试链接</a>
+     * <a href="http://localhost:8090/api/v1/openai/generate?model=gpt-4o-mini&message=你好">测试链接</a>
      * 
-     * @param model OpenAI模型名称，如"gpt-3.5-turbo"、"gpt-4"等
+     * @param model OpenAI模型名称，如"gpt-4o-mini"、"gpt-3.5-turbo"、"gpt-4"等
      * @param message 用户输入的消息内容
      * @return ChatResponse 包含AI生成回复的响应对象
      * 
@@ -71,7 +71,7 @@ public class OpenAiController implements IAiService {
     @RequestMapping(value = "generate", method = RequestMethod.GET)
     @Override
     public ChatResponse generate(
-            @Parameter(description = "OpenAI模型名称", example = "gpt-3.5-turbo", required = true)
+            @Parameter(description = "OpenAI模型名称", example = "gpt-4o-mini", required = true)
             @RequestParam(name = "model") String model,
             @Parameter(description = "用户消息内容", example = "你好，请介绍一下自己", required = true)
             @RequestParam(name = "message") String message) {
@@ -91,9 +91,9 @@ public class OpenAiController implements IAiService {
      * 适用于需要实时显示生成过程的场景，提供更好的用户体验。
      * </p>
      * 
-     * <a href="http://localhost:8090/api/v1/openai/generate_stream?model=gpt-3.5-turbo&message=请写一首关于春天的诗">测试链接</a>
+     * <a href="http://localhost:8090/api/v1/openai/generate_stream?model=gpt-4o-mini&message=请写一首关于春天的诗">测试链接</a>
      * 
-     * @param model OpenAI模型名称，如"gpt-3.5-turbo"、"gpt-4"等
+     * @param model OpenAI模型名称，如"gpt-4o-mini"、"gpt-3.5-turbo"、"gpt-4"等
      * @param message 用户输入的消息内容
      * @return Flux&lt;ChatResponse&gt; 流式响应对象，包含实时生成的内容
      * 
@@ -118,7 +118,7 @@ public class OpenAiController implements IAiService {
     })
     @RequestMapping(value = "generate_stream", method = RequestMethod.GET)
     public Flux<ChatResponse> generateStream(
-            @Parameter(description = "OpenAI模型名称", example = "gpt-3.5-turbo", required = true)
+            @Parameter(description = "OpenAI模型名称", example = "gpt-4o-mini", required = true)
             @RequestParam(name = "model") String model,
             @Parameter(description = "用户消息内容", example = "请写一首关于春天的诗", required = true)
             @RequestParam(name = "message") String message) {
@@ -146,9 +146,9 @@ public class OpenAiController implements IAiService {
      *   <li>调用OpenAI模型进行流式生成</li>
      * </ol>
      * 
-     * <a href="http://localhost:8090/api/v1/openai/generate_stream_rag?model=gpt-3.5-turbo&ragTag=spring-ai&message=什么是RAG">测试链接</a>
+     * <a href="http://localhost:8090/api/v1/openai/generate_stream_rag?model=gpt-4o-mini&ragTag=spring-ai&message=什么是RAG">测试链接</a>
      * 
-     * @param model 指定的OpenAI模型名称，如"gpt-3.5-turbo"、"gpt-4"等
+     * @param model 指定的OpenAI模型名称，如"gpt-4o-mini"、"gpt-3.5-turbo"、"gpt-4"等
      * @param ragTag 知识库标签，用于过滤检索范围，对应向量数据库中的knowledge字段
      * @param message 用户输入的问题或消息内容
      * @return Flux&lt;ChatResponse&gt; 流式响应对象，包含AI生成的回复内容
@@ -177,7 +177,7 @@ public class OpenAiController implements IAiService {
     @RequestMapping(value = "generate_stream_rag", method = RequestMethod.GET)
     @Override
     public Flux<ChatResponse> generateStreamRag(
-            @Parameter(description = "OpenAI模型名称", example = "gpt-3.5-turbo", required = true)
+            @Parameter(description = "OpenAI模型名称", example = "gpt-4o-mini", required = true)
             @RequestParam(name = "model") String model,
             @Parameter(description = "知识库标签，用于指定检索范围", example = "spring-ai", required = true)
             @RequestParam(name = "ragTag") String ragTag,

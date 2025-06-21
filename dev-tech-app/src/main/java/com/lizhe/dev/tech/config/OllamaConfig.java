@@ -27,8 +27,8 @@ public class OllamaConfig {
         return new OpenAiApi(baseUrl, apikey);
     }
 
-    @Bean
-    public OllamaChatClient ollamaChatClient(OllamaApi ollamaApi) {
+    @Bean("customOllamaChatClient")
+    public OllamaChatClient customOllamaChatClient(OllamaApi ollamaApi) {
         return new OllamaChatClient(ollamaApi);
     }
 

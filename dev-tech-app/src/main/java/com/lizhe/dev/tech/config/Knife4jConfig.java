@@ -35,17 +35,28 @@ public class Knife4jConfig {
                                 .name("Apache 2.0")
                                 .url("https://www.apache.org/licenses/LICENSE-2.0")));
     }
+//
+//    /**
+//     * 配置API分组 - Ollama相关接口
+//     */
+//    @Bean
+//    public GroupedOpenApi ollamaApiGroup() {
+//        return GroupedOpenApi.builder()
+//                .group("Ollama AI")
+//                .pathsToMatch("/api/v1/ollama/**")
+//                .build();
+//    }
 
-    /**
-     * 配置API分组 - Ollama相关接口
-     */
-    @Bean
-    public GroupedOpenApi ollamaApiGroup() {
-        return GroupedOpenApi.builder()
-                .group("Ollama AI")
-                .pathsToMatch("/api/v1/ollama/**")
-                .build();
-    }
+//    /**
+//     * 配置API分组 - OpenAI相关接口
+//     */
+//    @Bean
+//    public GroupedOpenApi openAiApiGroup() {
+//        return GroupedOpenApi.builder()
+//                .group("OpenAI")
+//                .pathsToMatch("/api/v1/openai/**")
+//                .build();
+//    }
 
     /**
      * 配置API分组 - 所有接口
