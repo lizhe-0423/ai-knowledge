@@ -55,8 +55,8 @@ public class OllamaConfig {
         if ("nomic-embed-text".equalsIgnoreCase(model)) {
             OllamaEmbeddingClient embeddingClient = new OllamaEmbeddingClient(ollamaApi);
             embeddingClient.withDefaultOptions(OllamaOptions.create().withModel("nomic-embed-text"));
-            // 使用构造函数创建PgVectorStore，向量维度通过配置文件设置
-            return new PgVectorStore(jdbcTemplate, embeddingClient);
+            // 使用构造函数创建PgVectorStore，并设置向量维度为768
+            return new PgVectorStore(jdbcTemplate, embeddingClient, 1536);
         } else {
             OpenAiEmbeddingClient embeddingClient = new OpenAiEmbeddingClient(openAiApi);
             return new PgVectorStore(jdbcTemplate, embeddingClient);

@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch('http://localhost:8090/api/v1/rag/query_rag_tag_list')
             .then(response => response.json())
             .then(data => {
-                if (data.code === '0000' && data.data) {
+                if (data.code === '200' && data.data) {
                     // 清空现有选项（保留第一个默认选项）
                     while (ragSelect.options.length > 1) {
                         ragSelect.remove(1);
@@ -193,8 +193,7 @@ function appendMessage(content, isAssistant = false, saveToStorage = true) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `max-w-4xl mx-auto mb-4 p-4 rounded-lg ${isAssistant ? 'bg-gray-100' : 'bg-white border'} markdown-body relative`;
 
-    const renderedContent = DOMPurify.sanitize(marked.parse(content));
-    messageDiv.innerHTML = renderedContent;
+    messageDiv.innerHTML = DOMPurify.sanitize(marked.parse(content));
 
     // 添加复制按钮
     const copyBtn = document.createElement('button');

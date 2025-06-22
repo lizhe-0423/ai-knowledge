@@ -16,11 +16,9 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 import org.redisson.api.RList;
 import org.redisson.api.RedissonClient;
 import org.springframework.ai.document.Document;
-import org.springframework.ai.ollama.OllamaChatClient;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.ai.transformer.splitter.TokenTextSplitter;
 import org.springframework.ai.vectorstore.PgVectorStore;
-import org.springframework.ai.vectorstore.SimpleVectorStore;
 import org.springframework.core.io.PathResource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -112,6 +110,7 @@ public class RAGController implements IRAGService {
             @ApiResponse(responseCode = "500", description = "服务器内部错误")
     })
     @Override
+    @RequestMapping(value = "analyze_git_repository", method = RequestMethod.POST)
     public Response<String> analyzeGitRepository(
             @Parameter(description = "Git仓库URL地址", example = "https://github.com/user/repo.git", required = true)
             @RequestParam("repoUrl") String repoUrl,
@@ -129,18 +128,71 @@ public class RAGController implements IRAGService {
         // 删除已存在的本地目录，确保干净的克隆环境
         FileUtils.deleteDirectory(new File(localPath));
 
-        // 使用JGit克隆远程Git仓库到本地
-        Git git = Git.cloneRepository()
-                .setURI(repoUrl)
-                .setDirectory(new File(localPath))
-                .setCredentialsProvider(new UsernamePasswordCredentialsProvider(userName, token))
-                .call();
+        // 添加重试机制，处理网络连接重置问题
+        Git git = null;
+        int maxRetries = 3;
+        int retryCount = 0;
+        boolean success = false;
+        Exception lastException = null;
+
+        while (!success && retryCount < maxRetries) {
+            try {
+                // 使用JGit克隆远程Git仓库到本地，设置超时时间
+                log.info("开始克隆仓库（尝试 {} / {}）: {}", retryCount + 1, maxRetries, repoUrl);
+                git = Git.cloneRepository()
+                        .setURI(repoUrl)
+                        .setDirectory(new File(localPath))
+                        .setCredentialsProvider(new UsernamePasswordCredentialsProvider(userName, token))
+                        .setTimeout(300) // 设置超时时间为300秒
+                        .call();
+                success = true;
+                log.info("仓库克隆成功: {}", repoUrl);
+            } catch (Exception e) {
+                lastException = e;
+                retryCount++;
+                log.warn("仓库克隆失败（尝试 {} / {}）: {} - {}", retryCount, maxRetries, repoUrl, e.getMessage());
+                if (retryCount < maxRetries) {
+                    try {
+                        // 等待一段时间后重试
+                        int waitTime = 2000 * retryCount; // 递增等待时间
+                        log.info("等待 {} 毫秒后重试...", waitTime);
+                        Thread.sleep(waitTime);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        throw new RuntimeException("克隆操作被中断", ie);
+                    }
+                }
+            }
+        }
+
+        // 如果所有重试都失败，抛出最后捕获的异常
+        if (!success) {
+            throw new RuntimeException("在 " + maxRetries + " 次尝试后仍无法克隆仓库: " + repoUrl, lastException);
+        }
 
         // 使用Files.walkFileTree遍历克隆的仓库目录树，处理每个文件
         Files.walkFileTree(Paths.get(localPath), new SimpleFileVisitor<>() {
             @Override
             @NotNull
-            public FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(@NotNull Path file, @NotNull BasicFileAttributes attrs) {
+                // 跳过.git目录下的所有文件
+                if (file.toString().contains(".git")) {
+                    return FileVisitResult.CONTINUE;
+                }
+
+                // 只处理常见的文档文件类型
+                String fileName = file.getFileName().toString().toLowerCase();
+                if (!isDocumentFile(fileName)) {
+                    log.info("跳过非文档文件: {}", fileName);
+                    return FileVisitResult.CONTINUE;
+                }
+
+                // 检查文件大小，跳过空文件
+                if (attrs.size() == 0) {
+                    log.info("跳过空文件: {}", fileName);
+                    return FileVisitResult.CONTINUE;
+                }
+
                 log.info("{} 遍历解析路径，上传知识库:{}", repoProjectName, file.getFileName());
                 try {
                     // 使用TikaDocumentReader读取文件内容，支持多种文件格式
@@ -148,7 +200,7 @@ public class RAGController implements IRAGService {
                     processDocuments(reader, repoProjectName);
                 } catch (Exception e) {
                     // 记录文件处理失败的错误，但继续处理其他文件
-                    log.error("遍历解析路径，上传知识库失败:{}", file.getFileName());
+                    log.error("遍历解析路径，上传知识库失败:{} - {}", file.getFileName(), e.getMessage());
                 }
 
                 // 继续遍历下一个文件
@@ -157,9 +209,19 @@ public class RAGController implements IRAGService {
 
             @Override
             @NotNull
-            public FileVisitResult visitFileFailed(@NotNull Path file, @NotNull IOException exc) throws IOException {
+            public FileVisitResult visitFileFailed(@NotNull Path file, @NotNull IOException exc) {
                 // 记录无法访问的文件，但继续遍历
                 log.info("Failed to access file: {} - {}", file, exc.getMessage());
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            @NotNull
+            public FileVisitResult preVisitDirectory(@NotNull Path dir, @NotNull BasicFileAttributes attrs) {
+                // 跳过.git目录
+                if (dir.getFileName().toString().equals(".git")) {
+                    return FileVisitResult.SKIP_SUBTREE;
+                }
                 return FileVisitResult.CONTINUE;
             }
         });
@@ -218,5 +280,25 @@ public class RAGController implements IRAGService {
         String[] parts = repoUrl.split("/");
         String projectNameWithGit = parts[parts.length - 1];
         return projectNameWithGit.replace(".git", "");
+    }
+
+    /**
+     * 判断文件是否为支持的文档类型
+     *
+     * @param fileName 文件名
+     * @return 如果是支持的文档类型返回true，否则返回false
+     */
+    private boolean isDocumentFile(String fileName) {
+        return fileName.endsWith(".txt") ||
+                fileName.endsWith(".md") ||
+                fileName.endsWith(".pdf") ||
+                fileName.endsWith(".doc") ||
+                fileName.endsWith(".docx") ||
+                fileName.endsWith(".java") ||
+                fileName.endsWith(".py") ||
+                fileName.endsWith(".js") ||
+                fileName.endsWith(".html") ||
+                fileName.endsWith(".xml") ||
+                fileName.endsWith(".json");
     }
 }
