@@ -15,7 +15,7 @@ services:
     privileged: true
   # ai-rag-knowledge
   ai-rag-knowledge-app:
-    image: fuzhengwei/ai-rag-knowledge-app:1.1
+    image: lvemiw9/ai-knowledge-app:1.1
     container_name: ai-rag-knowledge-app
     restart: on-failure
     ports:
