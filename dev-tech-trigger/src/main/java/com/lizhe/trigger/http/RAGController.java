@@ -227,7 +227,18 @@ public class RAGController implements IRAGService {
         });
 
         // 清理本地克隆的临时目录
-        FileUtils.deleteDirectory(new File(localPath));
+        try {
+            // 先尝试关闭所有可能的文件句柄
+            System.gc();
+            // 等待一段时间，让文件句柄有时间释放
+            Thread.sleep(1000);
+            
+            // 尝试删除目录
+            safeDeleteDirectory(localPath);
+        } catch (Exception e) {
+            log.warn("清理本地克隆目录时出现问题: {} - {}", localPath, e.getMessage());
+            // 即使清理失败，也继续后续操作
+        }
 
         // 将项目名称添加到Redis中的知识库标签列表
         addRagTagToRedis(repoProjectName);
@@ -300,5 +311,96 @@ public class RAGController implements IRAGService {
                 fileName.endsWith(".html") ||
                 fileName.endsWith(".xml") ||
                 fileName.endsWith(".json");
+    }
+    
+    /**
+     * 安全地删除目录，处理常见的文件锁定和权限问题
+     * 
+     * @param directoryPath 要删除的目录路径
+     * @throws IOException 如果删除失败
+     */
+    private void safeDeleteDirectory(String directoryPath) throws IOException {
+        File directory = new File(directoryPath);
+        if (!directory.exists()) {
+            return; // 目录不存在，无需删除
+        }
+        
+        // 特殊处理 .git 目录
+        File gitDir = new File(directoryPath, ".git");
+        if (gitDir.exists()) {
+            // 尝试重命名 .git 目录，这在 Windows 上可能有助于解除文件锁定
+            File renamedGitDir = new File(directoryPath, "_git_renamed_temp");
+            boolean renamed = gitDir.renameTo(renamedGitDir);
+            if (renamed) {
+                log.info("已重命名 .git 目录以便于删除");
+                gitDir = renamedGitDir;
+            }
+            
+            // 尝试删除 .git 目录内的文件
+            try {
+                deleteGitDirectoryContents(gitDir);
+            } catch (IOException e) {
+                log.warn("无法完全删除 .git 目录内容: {}", e.getMessage());
+            }
+        }
+        
+        // 尝试多次删除整个目录
+        int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                FileUtils.deleteDirectory(directory);
+                log.info("成功删除目录: {}", directoryPath);
+                return; // 删除成功，退出方法
+            } catch (IOException e) {
+                if (attempt == maxAttempts) {
+                    throw e; // 最后一次尝试仍然失败，抛出异常
+                }
+                
+                log.warn("删除目录失败，第 {} 次尝试: {} - {}", attempt, directoryPath, e.getMessage());
+                
+                // 等待一段时间再重试
+                try {
+                    Thread.sleep(1000L * attempt); // 逐渐增加等待时间
+                    System.gc(); // 尝试释放资源
+                } catch (InterruptedException ie) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
+    }
+    
+    /**
+     * 递归删除 .git 目录内容，特殊处理锁定的文件
+     * 
+     * @param directory .git 目录
+     * @throws IOException 如果删除失败
+     */
+    private void deleteGitDirectoryContents(File directory) throws IOException {
+        if (!directory.exists()) {
+            return;
+        }
+        
+        File[] files = directory.listFiles();
+        if (files == null) {
+            return;
+        }
+        
+        // 先删除文件，再删除目录
+        for (File file : files) {
+            if (file.isDirectory()) {
+                try {
+                    deleteGitDirectoryContents(file);
+                    file.delete(); // 尝试删除空目录
+                } catch (IOException e) {
+                    log.debug("无法删除目录: {} - {}", file.getPath(), e.getMessage());
+                }
+            } else {
+                // 对于文件，设置为可写并尝试删除
+                file.setWritable(true);
+                if (!file.delete()) {
+                    log.debug("无法删除文件: {}", file.getPath());
+                }
+            }
+        }
     }
 }
