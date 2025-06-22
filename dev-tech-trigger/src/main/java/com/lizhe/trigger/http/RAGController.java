@@ -47,11 +47,7 @@ import java.util.List;
 public class RAGController implements IRAGService {
 
     @Resource
-    private OllamaChatClient ollamaChatClient;
-    @Resource
     private TokenTextSplitter tokenTextSplitter;
-    @Resource
-    private SimpleVectorStore simpleVectorStore;
     @Resource
     private PgVectorStore pgVectorStore;
     @Resource
@@ -88,7 +84,7 @@ public class RAGController implements IRAGService {
     @Override
     public Response<String> uploadFile(
             @Parameter(description = "知识库标签名称", example = "技术文档", required = true)
-            @RequestParam() String ragTag,
+            @RequestParam("ragTag") String ragTag,
             @Parameter(description = "要上传的文件列表，支持PDF、Word、TXT等格式", required = true)
             @RequestParam("file") List<MultipartFile> files) {
         log.info("上传知识库开始 {}", ragTag);
@@ -118,11 +114,11 @@ public class RAGController implements IRAGService {
     @Override
     public Response<String> analyzeGitRepository(
             @Parameter(description = "Git仓库URL地址", example = "https://github.com/user/repo.git", required = true)
-            String repoUrl,
+            @RequestParam("repoUrl") String repoUrl,
             @Parameter(description = "Git用户名（用于认证）", example = "username", required = true)
-            String userName,
+            @RequestParam("userName") String userName,
             @Parameter(description = "Git访问令牌（用于认证）", example = "ghp_xxxxxxxxxxxx", required = true)
-            String token) throws Exception {
+            @RequestParam("token") String token) throws Exception {
 
         // 定义本地克隆路径
         String localPath = "./git-cloned-repo";
